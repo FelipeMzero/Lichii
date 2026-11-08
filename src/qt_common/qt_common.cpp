@@ -269,6 +269,8 @@ void Init(QWidget* root) {
              Common::GetMemInfo().TotalPhysicalMemory / f64{1_GiB});
     LOG_INFO(Frontend, "Host Swap: {:.2f} GiB", Common::GetMemInfo().TotalSwapMemory / f64{1_GiB});
 #ifdef _WIN32
+    SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS);
+    LOG_INFO(Frontend, "Host Process Priority: ABOVE_NORMAL_PRIORITY_CLASS");
     LOG_INFO(Frontend, "Host Timer Resolution: {:.4f} ms",
              std::chrono::duration_cast<std::chrono::duration<f64, std::milli>>(
                  Common::Windows::SetCurrentTimerResolutionToMaximum())

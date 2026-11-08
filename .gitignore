@@ -10,6 +10,7 @@ doc-build/
 out/
 AppDir/
 uruntime
+.tools/
 
 # dtrace and ktrace stuffs
 [dk]trace-out/

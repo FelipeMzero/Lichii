@@ -33,7 +33,7 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Noto Sans&apos;; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:12pt;&quot;&gt;Eden é um emulador experimental de código aberto para o Nintendo Switch licenciado sob a licença GPLv3.0+ baseado no emulador yuzu cujo desenvolvimento foi encerrado em Março de 2024 &lt;br /&gt;&lt;br /&gt;Esse software não deve ser utilizado para jogar jogos obtidos de forma ilegal&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:12pt;&quot;&gt;Lichii é um emulador experimental de código aberto para Nintendo Switch e Switch 2 licenciado sob a licença GPLv3.0+.&lt;br /&gt;&lt;br /&gt;&lt;b&gt;Tradução Brasil por Felipemzero&lt;/b&gt;&lt;br /&gt;Otimizado especialmente para AMD Ryzen 5 3600 e Radeon RX 5700 XT.&lt;br /&gt;&lt;br /&gt;Esse software não deve ser utilizado para jogar jogos obtidos de forma ilegal.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../src/yuzu/aboutdialog.ui" line="131"/>

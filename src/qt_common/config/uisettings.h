@@ -173,7 +173,7 @@ struct Values {
     bool game_dir_deprecated_deepscan;
     QVector<GameDir> game_dirs;
     QStringList recent_files;
-    Setting<std::string> language{linkage, {}, "language", Category::Paths};
+    Setting<std::string> language{linkage, "pt_BR", "language", Category::Paths};
 
     // Optional key that enables the SteamGridDB icon fallback
     Setting<std::string> steamgriddb_api_key{linkage, {}, "steamgriddb_api_key", Category::Ui};

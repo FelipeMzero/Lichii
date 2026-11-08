@@ -5540,9 +5540,12 @@ void MainWindow::UpdateUITheme() {
 void MainWindow::LoadTranslation() {
     bool loaded;
 
-    if (UISettings::values.language.GetValue().empty()) {
-        // If the selected language is empty, use system locale
-        loaded = translator.load(QLocale(), {}, {}, QStringLiteral(":/languages/"));
+    if (UISettings::values.language.GetValue().empty() || UISettings::values.language.GetValue() == "en") {
+        // Default to Portuguese (Brazil) translation by Felipemzero
+        loaded = translator.load(QStringLiteral("pt_BR"), QStringLiteral(":/languages/"));
+        if (!loaded) {
+            loaded = translator.load(QLocale(), {}, {}, QStringLiteral(":/languages/"));
+        }
     } else {
         // Otherwise load from the specified file
         loaded = translator.load(QString::fromStdString(UISettings::values.language.GetValue()),

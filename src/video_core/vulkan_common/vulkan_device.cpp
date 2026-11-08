@@ -503,7 +503,8 @@ Device::Device(VkInstance instance_, vk::PhysicalDevice physical_, VkSurfaceKHR 
     const void* first_next = &features2;
 
     VkDeviceDiagnosticsConfigCreateInfoNV diagnostics_nv{};
-    const bool use_diagnostics_nv = Settings::values.enable_nsight_aftermath && extensions.device_diagnostics_config;
+    const bool use_diagnostics_nv = is_nvidia && extensions.device_diagnostics_config &&
+                                    Settings::values.enable_nsight_aftermath.GetValue();
     if (use_diagnostics_nv) {
         nsight_aftermath_tracker = std::make_unique<NsightAftermathTracker>();
 

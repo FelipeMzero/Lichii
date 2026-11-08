@@ -6,6 +6,7 @@
 
 # Build directory
 /[Bb]uild*/
+/bin/
 doc-build/
 out/
 AppDir/

@@ -760,6 +760,9 @@ PipelineCache::~PipelineCache() {
     }
     graphics_cache.clear();
     evicted_pipelines.clear();
+    if (pipeline_binaries_enabled) {
+        device.GetLogical().DisablePipelineBinaryCache();
+    }
 }
 
 void PipelineCache::SaveUsedPipelines() {
@@ -957,6 +960,12 @@ void PipelineCache::LoadDiskResources(u64 title_id, std::stop_token stop_loading
         VideoCommon::VersionedPipelineCachePath(base_dir, "vulkan", CACHE_VERSION);
     used_pipelines_filename =
         VideoCommon::VersionedPipelineCachePath(base_dir, "vulkan_used", CACHE_VERSION);
+    if (Settings::values.use_vulkan_pipeline_binaries.GetValue() &&
+        device.IsKhrPipelineBinarySupported()) {
+        device.GetLogical().EnablePipelineBinaryCache(
+            VideoCommon::VersionedPipelineCachePath(base_dir, "vulkan_binaries", CACHE_VERSION));
+        pipeline_binaries_enabled = true;
+    }
     constexpr std::array<char, 8> shader_magic{'y', 'u', 'z', 'u', 'c', 'a', 'c', 'h'};
     VideoCommon::CopyCompatiblePipelineCache(
         VideoCommon::VersionedPipelineCachePath(base_dir, "vulkan", 52), pipeline_cache_filename,

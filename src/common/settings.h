@@ -398,6 +398,17 @@ struct Values {
                                                            Specialization::Percentage,
                                                        true,
                                                        true};
+    // Switch 2 VSync event rate. Games start frames on it, so above 60 only games with a
+    // real-time step (e.g. the Ocarina "FPS Unlock" built-in) keep their speed.
+    SwitchableSetting<u16, true> frame_rate_limit{linkage,
+                                                  60,
+                                                  30,
+                                                  240,
+                                                  "nx2_frame_rate_limit",
+                                                  Category::Renderer,
+                                                  Specialization::Scalar,
+                                                  true,
+                                                  false};
     // NVIDIA DLSS (through NVIDIA Streamline) in place of a game's DLSS.
     SwitchableSetting<bool> nvidia_dlss{linkage, false, "nvidia_dlss", Category::Renderer};
     SwitchableSetting<AspectRatio, true> aspect_ratio{linkage,
@@ -537,18 +548,14 @@ struct Values {
                                          linkage, 0, "bg_blue", Category::Renderer, Specialization::Default, true, true};
 
     SwitchableSetting<GpuAccuracy, true> gpu_accuracy{linkage,
-#ifdef __ANDROID__
                                                       GpuAccuracy::Low,
-#else
-                                                      GpuAccuracy::High,
-#endif
                                                       "gpu_accuracy",
                                                       Category::RendererAdvanced,
                                                       Specialization::Default,
                                                       true,
                                                       true};
 
-    GpuAccuracy current_gpu_accuracy{GpuAccuracy::High};
+    GpuAccuracy current_gpu_accuracy{GpuAccuracy::Low};
 
     SwitchableSetting<DmaAccuracy, true> dma_accuracy{linkage,
                                                       DmaAccuracy::Default,
@@ -567,6 +574,20 @@ struct Values {
                                                                  Specialization::Default,
                                                                  true,
                                                                  true};
+
+    // How much of a native (Switch 2) compute program's storage binding a dispatch marks
+    // GPU-written. Its pointer carries no size, so the binding is up to 8 MiB; marking all of it
+    // defers the CPU's later writes to those pages (Ocarina of Time's white leaves) and has fences
+    // copy them back. Auto: the extent the shader's stores provably reach (the whole binding when
+    // unknown). Full: the whole binding (the behaviour before the store extent).
+    SwitchableSetting<NativeComputeWriteMark, true> native_compute_write_mark{
+        linkage,
+        NativeComputeWriteMark::Auto,
+        "native_compute_write_mark",
+        Category::RendererAdvanced,
+        Specialization::Default,
+        true,
+        true};
 
     SwitchableSetting<VramUsageMode, true> vram_usage_mode{linkage,
                                                            VramUsageMode::Conservative,
@@ -626,7 +647,7 @@ struct Values {
         Specialization::Default};
 
     SwitchableSetting<NativeAsyncDraws> native_async_draws{linkage,
-                                                           NativeAsyncDraws::Wait,
+                                                           NativeAsyncDraws::Skip,
                                                            "native_async_draws",
                                                            Category::RendererAdvanced,
                                                            Specialization::Default,
@@ -634,7 +655,7 @@ struct Values {
                                                            true};
 
     SwitchableSetting<u32, true> native_pipeline_wait_ms{linkage,
-                                                         8,
+                                                         1,
                                                          1,
                                                          100,
                                                          "native_pipeline_wait_ms",
@@ -646,6 +667,19 @@ struct Values {
     SwitchableSetting<bool> use_vulkan_pipeline_binaries{
         linkage, true, "use_vulkan_pipeline_binaries", Category::RendererAdvanced,
         Specialization::Default};
+
+    // Precache shaders before the game starts: the compute programs in the game files and the
+    // cached graphics pipelines the boot leaves for later are built on the loading screen, so the
+    // driver's cache holds them before the game first uses them.
+    // Ask: the desktop app asks at launch while the game has no finished precache; where nothing
+    // asks, as Off.
+    SwitchableSetting<PrecacheShaders> precache_shaders{linkage,
+                                                        PrecacheShaders::Off,
+                                                        "precache_shaders",
+                                                        Category::RendererAdvanced,
+                                                        Specialization::Default,
+                                                        true,
+                                                        true};
 
     SwitchableSetting<bool> enable_compute_pipelines{linkage, false, "enable_compute_pipelines",
                                                      Category::RendererAdvanced};
@@ -705,11 +739,7 @@ struct Values {
                                                         true,
                                                         true};
     SwitchableSetting<bool> async_presentation{linkage,
-#ifdef __ANDROID__
                                                true,
-#else
-                                               false,
-#endif
                                                "async_presentation", Category::RendererHacks};
 
     SwitchableSetting<bool> fix_bloom_effects{linkage, false, "fix_bloom_effects",
@@ -718,7 +748,7 @@ struct Values {
     SwitchableSetting<bool> emulate_bgr565{linkage, false, "emulate_bgr565",
                                             Category::RendererHacks};
 
-    SwitchableSetting<bool> use_asynchronous_shaders{linkage, false, "use_asynchronous_shaders",
+    SwitchableSetting<bool> use_asynchronous_shaders{linkage, true, "use_asynchronous_shaders",
                                                      Category::RendererHacks};
 
     SwitchableSetting<GpuUnswizzleSize> gpu_unswizzle_texture_size{linkage,
@@ -742,7 +772,7 @@ struct Values {
     SwitchableSetting<bool> gpu_unswizzle_enabled{linkage, false, "gpu_unswizzle_enabled",
                                                   Category::RendererHacks};
 
-    SwitchableSetting<bool> pin_gpu_threads{linkage, false, "pin_gpu_threads",
+    SwitchableSetting<bool> pin_gpu_threads{linkage, true, "pin_gpu_threads",
                                             Category::RendererHacks};
 
     SwitchableSetting<ExtendedDynamicState> dyna_state{linkage,
@@ -966,11 +996,11 @@ struct Values {
     // GPU Logging
     Setting<GpuLogLevel> gpu_log_level{linkage, GpuLogLevel::Off, "gpu_log_level",
                                        Category::Debugging};
-    Setting<bool> gpu_log_vulkan_calls{linkage, true, "gpu_log_vulkan_calls", Category::Debugging};
+    Setting<bool> gpu_log_vulkan_calls{linkage, false, "gpu_log_vulkan_calls", Category::Debugging};
     Setting<bool> gpu_log_shader_dumps{linkage, false, "gpu_log_shader_dumps", Category::Debugging};
-    Setting<bool> gpu_log_memory_tracking{linkage, true, "gpu_log_memory_tracking",
+    Setting<bool> gpu_log_memory_tracking{linkage, false, "gpu_log_memory_tracking",
                                            Category::Debugging};
-    Setting<bool> gpu_log_driver_debug{linkage, true, "gpu_log_driver_debug", Category::Debugging};
+    Setting<bool> gpu_log_driver_debug{linkage, false, "gpu_log_driver_debug", Category::Debugging};
     Setting<s32> gpu_log_ring_buffer_size{linkage, 512, "gpu_log_ring_buffer_size",
                                            Category::Debugging};
 

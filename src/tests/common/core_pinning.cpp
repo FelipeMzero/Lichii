@@ -240,3 +240,30 @@ TEST_CASE("Core pinning: equal L3s, hybrid classes or unknown sizes keep the cla
     }
     CHECK(Common::PlanGpuThreadPinning(hybrid).performance_cores == 8);
 }
+
+TEST_CASE("Core pinning: sysfs CPU lists", "[common][core_pinning]") {
+    using Common::ParseCpuList;
+    CHECK(ParseCpuList("0-3,8,10-11") == std::vector<u32>{0, 1, 2, 3, 8, 10, 11});
+    CHECK(ParseCpuList("16-23\n") == std::vector<u32>{16, 17, 18, 19, 20, 21, 22, 23});
+    CHECK(ParseCpuList("5") == std::vector<u32>{5});
+    CHECK(ParseCpuList("").empty());
+    CHECK(ParseCpuList("3-1").empty());
+    CHECK(ParseCpuList("1,x").empty());
+    CHECK(ParseCpuList("0-").empty());
+    CHECK(ParseCpuList("0-4294967295").empty());
+    CHECK(ParseCpuList("4294967295") == std::vector<u32>{4294967295U});
+    CHECK(ParseCpuList("4294967294-4294967295") == std::vector<u32>{4294967294U, 4294967295U});
+    CHECK(ParseCpuList("4294967296").empty());
+}
+
+TEST_CASE("Core pinning: a 4P+4E CPU whose E-cores rank lower is skipped",
+          "[common][core_pinning]") {
+    // As LinuxProcessors reports an Intel hybrid CPU without cpu_capacity: the cpu_atom cores at
+    // half capacity.
+    std::vector<LogicalProcessor> processors;
+    AddCores(processors, 4, 2, 128);
+    AddCores(processors, 4, 1, 64);
+    const auto plan = Common::PlanGpuThreadPinning(processors);
+    CHECK(plan.performance_cores == 4);
+    CheckSkipped(plan);
+}
